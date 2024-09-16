@@ -5,26 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Expression Evaluator</title>
     <script>
-        // Function to evaluate math expressions
+        // Function to evaluate multiple math expressions
         function evaluateExpression() {
             const input = document.getElementById('input').value;
 
-            // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
-            const sanitizedExpression = input.replace(/[^-()\d/*+.]/g, '');
+            // Split the input by commas to handle multiple expressions
+            const expressions = input.split(',');
 
-            try {
-                // Use Function constructor to safely evaluate the expression
-                const result = new Function('return ' + sanitizedExpression)();
-                document.getElementById('result').textContent = `Result: ${result}`;
-            } catch (error) {
-                document.getElementById('result').textContent = 'Error: Invalid expression!';
-            }
+            let results = [];
+
+            // Loop through each expression and evaluate it
+            expressions.forEach(expression => {
+                // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
+                const sanitizedExpression = expression.replace(/[^-()\d/*+.]/g, '');
+
+                try {
+                    // Use Function constructor to safely evaluate the expression
+                    const result = new Function('return ' + sanitizedExpression)();
+                    results.push(result);
+                } catch (error) {
+                    results.push('Error: Invalid expression!');
+                }
+            });
+
+            // Display the results
+            document.getElementById('result').textContent = `Results: ${results.join(', ')}`;
         }
     </script>
 </head>
 <body>
     <h1>Math Expression Evaluator</h1>
-    <input type="text" id="input" placeholder="Enter a math expression (e.g., 2*2)">
+    <input type="text" id="input" placeholder="Enter expressions separated by commas (e.g., 2*2, 8-6)">
     <button onclick="evaluateExpression()">Evaluate</button>
     <p id="result"></p>
 </body>
