@@ -9,29 +9,22 @@
         function evaluateExpression() {
             const input = document.getElementById('input').value;
 
-            // Check if the input starts with 'math:(' and ends with ')'
-            if (input.startsWith('math:(') && input.endsWith(')')) {
-                const expression = input.slice(5, -1); // Extract the expression inside 'math:(...)'
+            // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
+            const sanitizedExpression = input.replace(/[^-()\d/*+.]/g, '');
 
-                // Only allow numbers and mathematical operators (+, -, *, /, **)
-                const sanitizedExpression = expression.replace(/[^-()\d/*+.]/g, '');
-
-                try {
-                    // Use Function constructor for safer eval
-                    const result = new Function('return ' + sanitizedExpression)();
-                    document.getElementById('result').textContent = `Result: ${result}`;
-                } catch (error) {
-                    document.getElementById('result').textContent = 'Error: Invalid expression!';
-                }
-            } else {
-                document.getElementById('result').textContent = 'Error: Expression must start with "math:(...)"';
+            try {
+                // Use Function constructor to safely evaluate the expression
+                const result = new Function('return ' + sanitizedExpression)();
+                document.getElementById('result').textContent = `Result: ${result}`;
+            } catch (error) {
+                document.getElementById('result').textContent = 'Error: Invalid expression!';
             }
         }
     </script>
 </head>
 <body>
     <h1>Math Expression Evaluator</h1>
-    <input type="text" id="input" placeholder="Enter math:(2*2)">
+    <input type="text" id="input" placeholder="Enter a math expression (e.g., 2*2)">
     <button onclick="evaluateExpression()">Evaluate</button>
     <p id="result"></p>
 </body>
