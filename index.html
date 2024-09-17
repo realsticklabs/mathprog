@@ -14,35 +14,39 @@
     <script>
         let chart;
 
-        // Function to evaluate multiple math expressions
-        function evaluateExpression() {
+        // Function to evaluate math expressions or plot graphs
+        function processInput() {
             const input = document.getElementById('input').value;
 
-            // Check if the input contains 'graph(' or not
+            // Determine if the input is for a graph or a mathematical expression
             if (input.startsWith('graph(') && input.endsWith(')')) {
-                plotGraph(input);  // If 'graph()' is used, plot the graph
+                plotGraph(input);  // If input contains 'graph()', plot the graph
             } else {
-                const expressions = input.split(','); // Split by commas
-
-                let results = [];
-
-                // Loop through each expression and evaluate it
-                expressions.forEach(expression => {
-                    // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
-                    const sanitizedExpression = expression.replace(/[^-()\d/*+.]/g, '');
-
-                    try {
-                        // Use Function constructor to safely evaluate the expression
-                        const result = new Function('return ' + sanitizedExpression)();
-                        results.push(result);
-                    } catch (error) {
-                        results.push('Error: Invalid expression!');
-                    }
-                });
-
-                // Display the results
-                document.getElementById('result').textContent = `Results: ${results.join(', ')}`;
+                evaluateMathExpressions(input); // Otherwise, evaluate it as math expressions
             }
+        }
+
+        // Function to evaluate multiple math expressions
+        function evaluateMathExpressions(input) {
+            const expressions = input.split(','); // Split by commas
+            let results = [];
+
+            // Loop through each expression and evaluate it
+            expressions.forEach(expression => {
+                // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
+                const sanitizedExpression = expression.replace(/[^-()\d/*+.]/g, '');
+
+                try {
+                    // Use Function constructor to safely evaluate the expression
+                    const result = new Function('return ' + sanitizedExpression)();
+                    results.push(result);
+                } catch (error) {
+                    results.push('Error: Invalid expression!');
+                }
+            });
+
+            // Display the results
+            document.getElementById('result').textContent = `Results: ${results.join(', ')}`;
         }
 
         // Function to parse and plot points on the graph
@@ -128,7 +132,7 @@
     <input type="text" id="input" placeholder="Enter math expressions or graph(a=1,2)">
     
     <!-- Button to evaluate expressions or plot graph -->
-    <button onclick="evaluateExpression()">Evaluate / Plot Graph</button>
+    <button onclick="processInput()">Evaluate / Plot Graph</button>
     
     <!-- Result display -->
     <p id="result"></p>
