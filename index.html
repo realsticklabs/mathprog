@@ -3,40 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Expression Evaluator</title>
+    <title>Math Evaluator and Graph Plotter</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            max-width: 600px;
+            max-height: 400px;
+        }
+    </style>
     <script>
+        let chart;
+
         // Function to evaluate multiple math expressions
         function evaluateExpression() {
             const input = document.getElementById('input').value;
 
-            // Split the input by commas to handle multiple expressions
-            const expressions = input.split(',');
+            // Check if the input contains 'graph(' or not
+            if (input.startsWith('graph(') && input.endsWith(')')) {
+                plotGraph(input);  // If 'graph()' is used, plot the graph
+            } else {
+                const expressions = input.split(','); // Split by commas
 
-            let results = [];
+                let results = [];
 
-            // Loop through each expression and evaluate it
-            expressions.forEach(expression => {
-                // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
-                const sanitizedExpression = expression.replace(/[^-()\d/*+.]/g, '');
+                // Loop through each expression and evaluate it
+                expressions.forEach(expression => {
+                    // Only allow numbers and mathematical operators (+, -, *, /, **, parentheses)
+                    const sanitizedExpression = expression.replace(/[^-()\d/*+.]/g, '');
 
-                try {
-                    // Use Function constructor to safely evaluate the expression
-                    const result = new Function('return ' + sanitizedExpression)();
-                    results.push(result);
-                } catch (error) {
-                    results.push('Error: Invalid expression!');
+                    try {
+                        // Use Function constructor to safely evaluate the expression
+                        const result = new Function('return ' + sanitizedExpression)();
+                        results.push(result);
+                    } catch (error) {
+                        results.push('Error: Invalid expression!');
+                    }
+                });
+
+                // Display the results
+                document.getElementById('result').textContent = `Results: ${results.join(', ')}`;
+            }
+        }
+
+        // Function to parse and plot points on the graph
+        function plotGraph(input) {
+            const expression = input.slice(6, -1); // Extract the content inside 'graph(...)'
+            const points = expression.split(','); // Split by commas
+
+            let xValues = [];
+            let yValues = [];
+            let labels = [];
+
+            // Process each point (e.g., 'a=1,2')
+            points.forEach(point => {
+                const match = point.match(/(\w)=(\d+),(\d+)/);
+                if (match) {
+                    const label = match[1];
+                    const x = parseFloat(match[2]);
+                    const y = parseFloat(match[3]);
+
+                    labels.push(label);
+                    xValues.push(x);
+                    yValues.push(y);
                 }
             });
 
-            // Display the results
-            document.getElementById('result').textContent = `Results: ${results.join(', ')}`;
+            // If there is a chart already, destroy it to refresh
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Create the graph
+            const ctx = document.getElementById('myChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'scatter', // Scatter plot for points
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Graph Points',
+                        data: xValues.map((x, i) => ({x: x, y: yValues[i]})),
+                        backgroundColor: 'blue',
+                        borderColor: 'blue',
+                        pointRadius: 5,
+                        showLine: false, // Don't connect the points with lines
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: {
+                                display: true,
+                                text: 'X Axis'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Y Axis'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `(${context.raw.x}, ${context.raw.y})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('result').textContent = 'Graph Plotted!';
         }
     </script>
 </head>
 <body>
-    <h1>Math Expression Evaluator</h1>
-    <input type="text" id="input" placeholder="Enter expressions separated by commas (e.g., 2*2, 8-6)">
-    <button onclick="evaluateExpression()">Evaluate</button>
+    <h1>Math Evaluator and Graph Plotter</h1>
+    
+    <!-- Input field for math expressions or graph plotting -->
+    <input type="text" id="input" placeholder="Enter math expressions or graph(a=1,2)">
+    
+    <!-- Button to evaluate expressions or plot graph -->
+    <button onclick="evaluateExpression()">Evaluate / Plot Graph</button>
+    
+    <!-- Result display -->
     <p id="result"></p>
+    
+    <!-- Canvas element for the graph -->
+    <canvas id="myChart"></canvas>
 </body>
 </html>
